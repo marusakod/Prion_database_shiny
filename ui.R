@@ -8,8 +8,6 @@ library(shinyWidgets)
 library(org.Mm.eg.db) # not needed anymore
 library(shinydashboard)
 library(shinyjs)
-library(fresh)
-library(ggtips)
 library(shinyBS)
 
 
@@ -35,7 +33,7 @@ header <- dashboardHeader(title = "Prion Database",
 sidebar <-   dashboardSidebar(
   #useShinyjs(),
   sidebarMenu(id = "tabs",
-    menuItem("Home", tabName = "description", icon = icon("home")),
+    menuItem("Home", tabName = "description", icon = icon("house")),
     menuItem("Gene search", tabName = "genes", icon = icon("search"),
              menuSubItem("Global gene expression view", tabName = "multiple_genes"),
              menuSubItem("Global splicing view", tabName = "multiple_splices"),
@@ -113,30 +111,47 @@ body <- ## Body content
               fluidPage(
                 column(width = 12,
               div(h2(strong("Welcome to The Prion Database")), style = "text-align: center; color:#2F8BAE"),
-              div(h3("-insert subtititle here-"), style = "text-align: center;"),
+              #div(h3("-insert subtititle here-"), style = "text-align: center;"),
               br()),
                 column(width = 6, 
               br(),
               div( img(src='www/experiment.png', height="100%", width="100%"), style="text-align: center;"),
               br()),
               column(width = 6,
-                     p("Prion diseases (PrDs) are fatal neurodegenerative diseases caused by transmissible proteinaceous particles termed prions (PrPSc). Prions primarily consist of the misfolded form of cellular prion protein (PrPC) incorporated into fibrillary β-sheet-rich structures, which are termed ‘amyloids’. Although prions primarily accumulate in the central nervous system leading to severe pathophysiological brain related symptoms, they can be taken up by the digestive system, followed by accumulation in lymphoid tissue and neuroinvasion via peripheral nerves; furthermore, prions can be present in the blood, which represent an efficient route of infection. Here, we report a searchable RNA sequencing analyses on brain (hippocampus), blood, hindlimb skeletal muscle, and spleen during the entire life span of mice after intracerebral exposure to prions (4, 8, 12, 14, 16, 18 and 20 weeks-post-inoculation and terminal stage).", style="text-align: justify; font-size:16px;"),
+                     p("Prion diseases (PrDs) are fatal neurodegenerative diseases caused by transmissible proteinaceous particles termed prions (PrPSc). Prions primarily consist of the misfolded form of the cellular prion protein (PrPC) incorporated into fibrillary β-sheet-rich structures, which are termed ‘amyloids’. Although prions primarily accumulate in the central nervous system leading to severe pathophysiological brain-related symptoms, they can be taken up by the digestive system, followed by accumulation in lymphoid tissue and neuroinvasion via peripheral nerves. Furthermore, prions can be present in the blood, which represent an efficient route of infection. Here, we present a searchable database of transcriptomic changes in the brain (hippocampus), blood, hindlimb skeletal muscle, and spleen during the entire life span of mice after intracerebral exposure to prions (4, 8, 12, 14, 16, 18 and 20 weeks-post-inoculation and terminal stage).", style="text-align: justify; font-size:18px;"),
                      br(),
-                     p("In the", span(strong("Gene search tab")), span("user/s can select three sections:"), style = "font-size:16px;"), 
+                     p("User can navigate to the", span(strong("Gene search")), span("tab and select one of the following sections:"), style="text-align: justify; font-size:18px;"), 
                      tags$div(
                        tags$ul(
-                         tags$li(actionLink("link_to_tabitem_multiple_genes", "Global gene expression view tab"), "generates volcano plots (Log2 Fold change over -Log10FDR) in selected organs. Thresholding and significance parameters can be tuned in selected organs. Gene/s of interest can be individually displayed within the related plots.", style="text-align: justify; font-size:16px;"), 
-                         tags$li(actionLink("link_to_tabitem_multiple_splices", "Global splicing view tab"), "generates bar plots (number of differentially used splice variants over timepoints) showing the number of significant splice variants in selected organs and timepoints. The colors in bar plots represent different proportions of splice variant types which are Alternative 3' splice site (proximal), Alternative 3' splice site (distal), Retained intron (exclusion), Retained intron (retention), Skipped exon (skipping), 5' splice site (proximal), Alternative last exon and other", style="text-align: justify; font-size:16px;"),
-                         tags$li(actionLink("link_to_tabitem_one_gene", "Single gene view tab"), "generates line plot (Log2 Fold change over timepoints) showing how the expression of a selected gene changes over time. In case of any significant splice variants detected for the related gene, they are displayed in a table below: each row in the table represents one splice variant which can be visualized in a splice graph if you click on the row in the table", style="text-align: justify; font-size:16px;")
+                         tags$li(actionLink("link_to_tabitem_multiple_genes", "Global gene expression view"), "tab generates volcano plots with information on differentially expressed across all selected organs and time points.", style="text-align: justify; font-size:18px;"), 
+                         tags$li("In the",actionLink("link_to_tabitem_multiple_splices", "Global splicing view"), "tab, a summary of splice variants in selected organs and time points is shown in a bar chart.", style="text-align: justify; font-size:18px;"),
+                         tags$li(actionLink("link_to_tabitem_one_gene", "Single gene view"), "tab allows the user to select a gene of interest and explore how its expression changes over time in selected organs, identify significantly altered splice variants and generate annotated splice graphs.", style="text-align: justify; font-size:18px;")
                        )
                      ), 
                      br(),
-                     p("In the", span(strong("Download tab")), "user/s can download the post-processed lists of differentially express genes and/or alternative splicing in selected organs", style="text-align: justify; font-size:16px;")
+                     p("In the", span(strong("Download tab")), "user can select from", actionLink("link_to_tabitem_expression_data", "Gene expression data"), "and", actionLink("link_to_tabitem_splicing_data", "Splicing data"), "to download either complete or filtered datasets.",  style="text-align: justify; font-size:18px;")
               
             
-      ))),
+      ),
+      tags$footer("This tool was developed by the Aguzzi lab at the", 
+                  a("University of Zürich", href = "https://www.stroke.uzh.ch/en/team0/Adriano-Aguzzi.html"), 
+                  br(), 
+                  "Code is available through",
+                  a("Github", href = "https://github.com/marusakod/Prion_database_shiny"), 
+                  align = "right", 
+                  style = "position:fixed; bottom:0; width:120%; right:5px; height:60px; color: black; padding: 10px; background-color: #D5DBDB; font-size:14px; text-align: right;"))),
       tabItem(tabName = "one_gene", 
               fluidRow(
+                column(width = 12, 
+                       box(width = 0, 
+                           fluidPage(column(width= 11, 
+                                     p("In the", strong("'Parameters'"), "section, user can seacrh genes by Ensembl ID or gene Symbol. The expression levels of the selected gene throughout disease progression are displayed in the",
+                                       strong("'Gene expression'"), "section with colors representing different organs. Points which meet the criteria for differential expression specified with", 
+                                       strong("'Significance filter"), "and", strong("'Significance threshold'"), "parameters are marked with a triangle. Splice variants which meet the same criteria are listed in the table within the",
+                                       strong("'Alternative splicing"), "section. By selecting individual rows from that table, user can generate a splice graph with corresponding splice variant colored in red.", 
+                                     style = "text-align: justify; font-size:16px;")), 
+                                     column(width = 1, 
+                                            div(img(src='www/info.png', height="60%", width="60%"), style="text-align: center;"))))), 
                 column(width = 3,
                        box(width = 0,
                            title = "Parameters",
@@ -523,7 +538,7 @@ body <- ## Body content
                                                            size = "sm",
                                                            icon = icon("download"))),
                                             bsPopover("see_total_spl", title="Entire dataset preview", placement="bottom", options = list(container = "body"),
-                                                      content="The entire dataset contains # rows. Only 20 rows will be displayed in preview."))
+                                                      content="The entire dataset contains 492840 rows. Only 20 rows will be displayed in preview."))
     
                        )),
                 column(width = 9, uiOutput("get_box_for_spl_preview")))), 
@@ -573,7 +588,7 @@ body <- ## Body content
                                         "Group by:", 
                                         choices = c("Organ", "Time point"),
                                         selected = "Time point",
-                                        inline = TRUE),
+                                        inline = FALSE),
                           
                            prettyCheckbox(inputId = "setScales",
                                           label = "Fixed scales",
@@ -637,6 +652,21 @@ body <- ## Body content
                         
                            
                            )))),
+                
+                column(width = 5, align = "center",
+                       box(width = 0,
+                           fluidPage(
+                             column(
+                               width = 9,
+                           p("In the", strong("‘Volcano plot parameters’"), "section, the user can select",
+                           strong("‘Group by: Organ’"), "to visualize gene expression changes at different selected timepoints in a particular organ. In contrast,", 
+                           strong("‘Group by: Time point’"), "allows the user to display the changes in different organs at a particular time point. Checking the box", 
+                           strong("‘Fixed scales’"), "will generate a faceted volcano plot with a shared x and y scale. User can select different thresholds for defining differentially expressed genes by adjusting the", 
+                           strong("‘Significance filter’"), "," ,strong("‘Significance threshold’"), "and", strong("‘Absolute Fold Change Threshold’"), "parameters. Gene/s of interest can be displayed on the volcano plot by checking the box",
+                           strong("‘Annotate genes’"), "and selecting gene symbols from a dropdown menu. Information on all annotated genes will be displayed in a table underneath the volcano plot upon plotting.",
+                           style="text-align: justify; font-size:16px;")), 
+                           column(width = 3,
+                                  div(img(src='www/info.png', height="80%", width="80%"), style="text-align: center;"))))), 
                        
   
                        column(width = 12, align = "center", uiOutput("get_volcano_box")
@@ -673,7 +703,7 @@ body <- ## Body content
                                         "Group by:", 
                                         choices = c("Organ" = "organ", "Time point" = "timepoint"),
                                         selected = "organ",
-                                        inline = TRUE),
+                                        inline = FALSE),
                            pickerInput("S_Organ_pick",
                                        "Select Organs",
                                        choices = levels(all_organs_data_list$organ),
@@ -731,6 +761,18 @@ body <- ## Body content
                        )
                 
               ),
+              column(width = 5, 
+                     box(width = 0, 
+                         fluidPage(
+                           column(width = 9, 
+                                  p("In the", strong("'Plot parameters'"), "section, user can select", strong("'Group by: Organ'"), "to generate a bar plot with time points on the x-axis and selected organs as facets. With", 
+                                    strong("'Group by: Time point'"), "time points are displayed as facets. User can select different thresholds for identifying splice variants with differential usage by adjusting the", 
+                                    strong("'Significance filter'") ,",", strong("'Significance threshold'"), "and", strong("'Absolute Fold Change Threshold'"), "parameters. Checking the box",
+                                      strong("'Fixed scales'"), "will generate a faceted bar chart with a shared y-axis. When individual bars in the plot are clicked a table with additional information is displayed underneath.", 
+                                    style = "text-align: justify; font-size:16px;")),
+                           column(width = 3, 
+                                  div(img(src='www/info.png', height="80%", width="80%"), style="text-align: center;")))
+                         )),
               column(width = 12, align = "center", uiOutput("get_splicingPlot_box")),
               column(width = 12, uiOutput("get_spl_table_box"))
               
@@ -743,16 +785,12 @@ body <- ## Body content
     
     )
 
-    
+   
  
   )
     
   
-footer <- tags$footer("This tool was developed by the Aguzzi lab at the University of Zürich", 
-            br(), 
-            "Code is available through Github",
-            align = "center", 
-            style = "position:fixed; bottom:0; width:100%; height:70px; color: black; padding: 10px; background-color: #D5DBDB; font-size:16px; text-align: center;"))
+
 
 
 
@@ -762,7 +800,10 @@ ui <- function(){
   addResourcePath("www", "www")
   tagList(
   shinydashboard::dashboardPage(useShinyjs(),
-                header = header, sidebar = sidebar, body = body))
+                header = header, sidebar = sidebar, body = body),
+ 
+  )
+  
 
 }
 

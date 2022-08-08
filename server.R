@@ -16,46 +16,22 @@ library(SGSeq)
 
 # read in data -------------------------------------
 ## gene expression data
-all_organs_data_list <- readRDS("all_organs_data_list.rds")
-all_organs_data_list <- all_organs_data_list %>% filter(timepoint != "old") %>% mutate(abs_l2FC = abs(log2.Ratio))
+all_organs_data_list <- readRDS("data/all_organs_data_list.rds")
 all_organs_data_list$timepoint <- factor(all_organs_data_list$timepoint, levels = c("4 wpi", "8 wpi", "12 wpi", "14 wpi", "16 wpi", "18 wpi", "20 wpi", "terminal"))
 all_organs_data_list$organ <- factor(all_organs_data_list$organ, levels = unique(all_organs_data_list$organ))
-all_organs_data_list <- all_organs_data_list %>%
-                        mutate(description = gsub("\\[.*", "", description)) %>%
-                        dplyr:: select(-gc,
-                                       -featWidth,
-                                       -transcript_id,
-                                       -type,
-                                       -GO.BP,
-                                       -GO.MF,
-                                       -GO.CC,
-                                       -hgnc_symbol,
-                                       -seqnames,
-                                       -start,
-                                       -end,
-                                       -width,
-                                       -strand,
-                                       -isPresent,
-                                       -eIdentifier)
+all_organs_data_list <- distinct(all_organs_data_list)
+all_organs_data_list <- all_organs_data_list %>% filter(gene_name != "")
 
-# find ENSEMBL IDs for genes that don't have them
-genes_with_missing_IDs <- all_organs_data_list %>% filter(is.na(Identifier)) %>% dplyr::select(gene_name) %>% flatten_chr()
-missing_ENSEMBLs <- mapIds(org.Mm.eg.db, keys = genes_with_missing_IDs, keytype = "SYMBOL", column="ENSEMBL")
-
-# replace NAs in Identifier with ENSEMBL IDs (some genes still don't have an ENSEMBL ID)
-all_organs_data_list$Identifier[which(is.na(all_organs_data_list$Identifier))] <- missing_ENSEMBLs
-colnames(all_organs_data_list) <- gsub("pValue","pvalue", colnames(all_organs_data_list))
-colnames(all_organs_data_list) <- gsub("fdr", "FDR", colnames(all_organs_data_list))
 
 ## splicing data ----------------------------------------------------
 
 #all_JuncSeq_results_merged <- readRDS("all_JuncSeq_results_merged.rds")
-all_SGDEX_results_merged <- readRDS("all_SGDEX_results_merged.rds")
+all_SGDEX_results_merged <- readRDS("data/all_SGDEX_results_merged.rds")
 all_SGDEX_results_merged$timepoint <- factor(all_SGDEX_results_merged$timepoint, levels = c("4 wpi", "8 wpi", "12 wpi", "14 wpi", "16 wpi", "18 wpi", "20 wpi", "terminal"))
 all_SGDEX_results_merged$organ <- factor(all_SGDEX_results_merged$organ, levels = unique(all_SGDEX_results_merged$organ))
 
-all_sg_variant_counts <- readRDS("all_vc_list.rds")
-all_sg_feature_counts <- readRDS("all_fc_list.rds")
+all_sg_variant_counts <- readRDS("data/all_vc_list.rds")
+all_sg_feature_counts <- readRDS("data/all_fc_list.rds")
 names(all_sg_feature_counts) <- gsub("Hippocampus", "brain", names(all_sg_feature_counts))
 names(all_sg_variant_counts) <- gsub("Hippocampus", "brain", names(all_sg_variant_counts))
 names(all_sg_feature_counts) <- gsub("term", "terminal", names(all_sg_feature_counts))
@@ -84,20 +60,29 @@ server <- function(input, output, session){
   # when an action link is clicked in the home tab, switch to the right menuItem
   
   observeEvent(input$link_to_tabitem_multiple_genes, {
-    newvalue <- "multiple_genes"
+   newvalue <- "multiple_genes"
     updateTabItems(session, "tabs", newvalue)
   })
   
   observeEvent(input$link_to_tabitem_multiple_splices, {
     newvalue <- "multiple_splices"
     updateTabItems(session, "tabs", newvalue)
-  })
+ })
   
   observeEvent(input$link_to_tabitem_one_gene, {
     newvalue <- "one_gene"
     updateTabItems(session, "tabs", newvalue)
   })
   
+  observeEvent(input$link_to_tabitem_expression_data, {
+    newvalue <- "download_expr"
+    updateTabItems(session, "tabs", newvalue)
+  })
+  
+  observeEvent(input$link_to_tabitem_splicing_data, {
+    newvalue <- "download_spl"
+    updateTabItems(session, "tabs", newvalue)
+  })
   
   
   #SINGLE GENE VIEW TAB ------------------------------------------------------
@@ -1645,8 +1630,6 @@ plotSpliceGraph(rowRanges(sgfc_pred),
     
     
 } 
-
-
 
 # run shiny app
 shinyApp(ui = ui, server = server)

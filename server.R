@@ -30,8 +30,16 @@ all_SGDEX_results_merged <- readRDS("data/all_SGDEX_results_merged.rds")
 all_SGDEX_results_merged$timepoint <- factor(all_SGDEX_results_merged$timepoint, levels = c("4 wpi", "8 wpi", "12 wpi", "14 wpi", "16 wpi", "18 wpi", "20 wpi", "terminal"))
 all_SGDEX_results_merged$organ <- factor(all_SGDEX_results_merged$organ, levels = unique(all_SGDEX_results_merged$organ))
 
-all_sg_variant_counts <- readRDS("data/all_vc_list.rds")
-all_sg_feature_counts <- readRDS("data/all_fc_list.rds")
+
+all_vc_files <- list.files(path = "data", pattern = "sg_variant_counts.*.rds")
+all_fc_files <- list.files(path = "data", pattern = "sg_feature_counts.*.rds")
+
+all_sg_variant_counts <- sapply(all_vc_files, FUN = readRDS, simplify = FALSE, USE.NAMES = FALSE)
+all_sg_feature_counts  <- sapply(all_fc_files, FUN = readRDS, simplify = FALSE, USE.NAMES = FALSE)
+
+names(all_sg_variant_counts)  <- gsub(".rds", "", all_vc_files)
+names(all_sg_feature_counts) <- gsub(".rds", "", all_fc_files)
+
 names(all_sg_feature_counts) <- gsub("Hippocampus", "brain", names(all_sg_feature_counts))
 names(all_sg_variant_counts) <- gsub("Hippocampus", "brain", names(all_sg_variant_counts))
 names(all_sg_feature_counts) <- gsub("term", "terminal", names(all_sg_feature_counts))

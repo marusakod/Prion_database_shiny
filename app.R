@@ -22,7 +22,7 @@ source('loadData.R')
 
 header <- dashboardHeader(title = "Prion Database",
                           tags$li(a(href = 'https://doi.org/10.1371/journal.ppat.1008653',
-                                    img(src = 'www/plos_pathogens.png',
+                                    img(src = 'www/brain_logo.png',
                                         title = "Brain paper", height = "35px"),
                                     style = "padding-top:10px; padding-bottom:10px;"),
                                   class = "dropdown"),

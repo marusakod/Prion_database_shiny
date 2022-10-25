@@ -12,7 +12,9 @@ all_organs_data_list <- all_organs_data_list %>% filter(gene_name != "")
 
 #all_JuncSeq_results_merged <- readRDS("all_JuncSeq_results_merged.rds")
 all_SGDEX_results_merged <- readRDS("data/all_SGDEX_results_merged.rds")
-all_SGDEX_results_merged$timepoint <- factor(all_SGDEX_results_merged$timepoint, levels = c("4 wpi", "8 wpi", "12 wpi", "14 wpi", "16 wpi", "18 wpi", "20 wpi", "terminal"))
+all_SGDEX_results_merged$timepoint <- factor(all_SGDEX_results_merged$timepoint,
+                                             levels = c("4 wpi", "8 wpi", "12 wpi", "14 wpi", "16 wpi", "18 wpi", "20 wpi", "terminal"))
+
 all_SGDEX_results_merged$organ <- factor(all_SGDEX_results_merged$organ, levels = unique(all_SGDEX_results_merged$organ))
 
 
@@ -43,3 +45,11 @@ gene_names_vector2 <- unique(all_SGDEX_results_merged$geneSymbol)
 gene_names_vector2 <- gene_names_vector2[!is.na(gene_names_vector2)]
 ensembl_IDs_vector2 <- unique(all_SGDEX_results_merged$EnsemblID)
 ensembl_IDs_vector2 <- ensembl_IDs_vector2[!is.na(ensembl_IDs_vector2)]
+
+
+# human data ----------------------------------------------------------
+
+CJD_muscle_data <- readRDS("data/CJD_muscle_data.rds")
+gene_names_vector_Human <- unique(CJD_muscle_data$gene_name)
+ensembl_ID_vector_Human <- unique(CJD_muscle_data$Identifier)
+

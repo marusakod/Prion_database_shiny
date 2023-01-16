@@ -125,14 +125,14 @@ body <- ## Body content
                        div( img(src='www/experiment.png', height="100%", width="100%"), style="text-align: center;"),
                        br()),
                 column(width = 6,
-                       p("Prion diseases (PrDs) are fatal neurodegenerative diseases caused by transmissible proteinaceous particles termed prions (PrPSc). Prions primarily consist of the misfolded form of the cellular prion protein (PrPC) incorporated into fibrillary β-sheet-rich structures, which are termed ‘amyloids’. Although prions primarily accumulate in the central nervous system leading to severe pathophysiological brain-related symptoms, they can be taken up by the digestive system, followed by accumulation in lymphoid tissue and neuroinvasion via peripheral nerves. Furthermore, prions can be present in the blood, which represent an efficient route of infection. Here, we present a searchable database of transcriptomic changes in the brain (hippocampus), blood, hindlimb skeletal muscle, and spleen during the entire life span of mice after intracerebral exposure to prions (4, 8, 12, 14, 16, 18 and 20 weeks-post-inoculation and terminal stage).", style="text-align: justify; font-size:18px;"),
+                       p("Prion diseases (PrDs) are fatal neurodegenerative diseases caused by transmissible proteinaceous particles termed prions (PrPSc). Prions primarily consist of the misfolded form of the cellular prion protein (PrPC) incorporated into fibrillary β-sheet-rich structures, which are termed ‘amyloids’. Although prions primarily accumulate in the central nervous system leading to severe pathophysiological brain-related symptoms, they can be taken up by the digestive system, followed by accumulation in lymphoid tissue and neuroinvasion via peripheral nerves. Furthermore, prions can be present in the blood, which represents an efficient route of infection. Here, we present a searchable database of transcriptional changes in the brain (hippocampus), blood, hindlimb skeletal muscle, and spleen in mice after intracerebral exposure to prions (4, 8, 12, 14, 16, 18 and 20 weeks-post-inoculation and terminal stage) as well as in skeletal muscle of humans diagnosed with sporadic CJD.", style="text-align: justify; font-size:18px;"),
                        br(),
                        p("User can navigate to the", span(strong("Gene search")), span("tab and select one of the following sections:"), style="text-align: justify; font-size:18px;"), 
                        tags$div(
                          tags$ul(
-                           tags$li(actionLink("link_to_tabitem_multiple_genes", "Global gene expression view"), "tab generates volcano plots with information on differentially expressed across all selected organs and time points.", style="text-align: justify; font-size:18px;"), 
-                           tags$li("In the",actionLink("link_to_tabitem_multiple_splices", "Global splicing view"), "tab, a summary of splice variants in selected organs and time points is shown in a bar chart.", style="text-align: justify; font-size:18px;"),
-                           tags$li(actionLink("link_to_tabitem_one_gene", "Single gene view"), "tab allows the user to select a gene of interest and explore how its expression changes over time in selected organs, identify significantly altered splice variants and generate annotated splice graphs.", style="text-align: justify; font-size:18px;")
+                           tags$li(actionLink("link_to_tabitem_multiple_genes", "Global gene expression view"), "tab generates volcano plots with information on differentially expressed genes in human or mice across all selected organs and time points.", style="text-align: justify; font-size:18px;"), 
+                           tags$li("In the",actionLink("link_to_tabitem_multiple_splices", "Global splicing view"), "tab, a summary of splice variants in selected mouse organs and time points is shown in a bar chart.", style="text-align: justify; font-size:18px;"),
+                           tags$li(actionLink("link_to_tabitem_one_gene", "Single gene view"), "tab allows the user to select a gene of interest and explore how its expression changes over time in selected mouse organs, identify significantly altered splice variants and generate annotated splice graphs.", style="text-align: justify; font-size:18px;")
                          )
                        ), 
                        br(),
@@ -268,11 +268,15 @@ body <- ## Body content
               fluidRow(
                 column(width = 3,
                        box(width = 0,
+                           awesomeRadio(inputId = "pickDownSpecies", 
+                                        label = "Select species", 
+                                        choices = c("mouse", "human"), 
+                                        selected = "mouse"), 
                            awesomeRadio(inputId = "expr_down_opts",
                                         label = "Download options",
                                         choices = c("Download entire dataset", "Select filters"),
                                         selected = "Download entire dataset"), 
-                           conditionalPanel("input.expr_down_opts == 'Select filters'",
+                           conditionalPanel("input.expr_down_opts == 'Select filters' && input.pickDownSpecies == 'mouse'",
                                             pickerInput("down_exp_organs_filter","Select organs",
                                                         choices= levels(all_organs_data_list$organ),
                                                         options = list(`actions-box` = TRUE),
@@ -345,6 +349,70 @@ body <- ## Body content
                                                         step = 0.5,
                                                         ticks = TRUE,
                                                         width = "200px")),
+                           
+                           conditionalPanel("input.expr_down_opts == 'Select filters' && input.pickDownSpecies == 'human'", 
+                                           
+                                             awesomeRadio(
+                                              inputId = "search_gene_expr_down_HUMAN",
+                                              label = div(style = "font-size: 14px", "Filter genes by:"),
+                                              choices = c("Gene Symbol" = 1, "Ensembl ID" = 2),
+                                              selected =  1,
+                                              inline = FALSE
+                                            ),
+                                            conditionalPanel(
+                                              "input.search_gene_expr_down_HUMAN == 1",
+                                              selectizeInput(
+                                                inputId = "Entry_gene_expr_down_HUMAN",
+                                                label = div(style = "font-size: 14px", " Select Gene Symbol"),
+                                                multiple = TRUE,
+                                                size = 20,
+                                                choices = NULL,
+                                                width = "200px",
+                                                options = list(
+                                                  placeholder = 'eg. AGAP2',
+                                                  onInitialize = I('function() { this.setValue("");}')
+                                                )
+                                              )
+                                            ),
+                                            conditionalPanel(
+                                              "input.search_gene_expr_down_HUMAN == 2",
+                                              selectizeInput(
+                                                inputId = "Entry_ID_expr_down_HUMAN",
+                                                label = div(style = "font-size: 14px","Select Ensembl gene ID"),
+                                                multiple = TRUE,
+                                                size = 20,
+                                                choices = NULL,
+                                                width = "200px",
+                                                options = list(
+                                                  placeholder = 'eg. ENSG...',
+                                                  onInitialize = I('function() { this.setValue(""); }')
+                                                )
+                                              )
+                                            ),
+                                            
+                                            awesomeRadio("signif_filter_down_exp_HUMAN",
+                                                         "Significance filter", 
+                                                         choices = c("FDR" = "FDR", "p-value (unadjusted)" = "pvalue"),
+                                                         selected = "FDR",
+                                                         inline = FALSE),
+                                            awesomeRadio(inputId = "FDR_thr_down_exp_HUMAN",
+                                                         label = div(style = "font-size: 14px", "Significance Threshold"),
+                                                         choices = c("no filter" = 2,
+                                                                     "0.1" = 0.1,
+                                                                     "0.05" = 0.05,
+                                                                     "0.01" =  0.01,
+                                                                     "0.001" = 0.001,
+                                                                     "10-4" = 0.0001,
+                                                                     "10-5" = 0.00001),
+                                                         selected = 0.05),
+                                            sliderInput(inputId = "absLFC_thr_down_exp_HUMAN",
+                                                        label = div(style = "font-size: 14px", "Absolute Fold Change Threshold"),
+                                                        value = 0.5,
+                                                        min = 0,
+                                                        max = 5,
+                                                        step = 0.5,
+                                                        ticks = TRUE,
+                                                        width = "200px")), 
                            pickerInput(inputId = "expr_down_filetype",
                                        label = "Select file type",
                                        choices = c("csv", "xlsx", "tsv", "rds"),
@@ -389,7 +457,7 @@ body <- ## Body content
                                                            size = "sm",
                                                            icon = icon("download"))),
                                             bsPopover("see_total_expr", title="Entire dataset preview", placement="bottom", options = list(container = "body"),
-                                                      content="The entire dataset contains 1357312 rows. Only 20 rows will be displayed in preview."))
+                                                      content="Only 20 rows will be displayed in preview."))
                            
                            
                            # this has to somehow appear only when user selects xlsx as filetype 
@@ -560,8 +628,13 @@ body <- ## Body content
                            status = "warning",
                            fluidPage(
                              column(width = 4,
+                                    awesomeRadio("pickVolcanoSpecies", 
+                                                 "Select species", 
+                                                 choices = c("mouse", "human"), 
+                                                 selected = "mouse", 
+                                                 inline = FALSE), 
                                     conditionalPanel(
-                                      condition = "input.groupBy == 'Organ'",
+                                      condition = "input.groupBy == 'Organ' && input.pickVolcanoSpecies == 'mouse'",
                                       pickerInput("global_select_one_organ", "Select organ",
                                                   choices = levels(all_organs_data_list$organ),
                                                   multiple = TRUE,
@@ -570,7 +643,7 @@ body <- ## Body content
                                                   width = "200px")
                                     ),
                                     conditionalPanel(
-                                      condition = "input.groupBy == 'Time point'",
+                                      condition = "input.groupBy == 'Time point' && input.pickVolcanoSpecies == 'mouse'",
                                       pickerInput("global_select_one_tp", "Select timepoint",
                                                   choices = levels(all_organs_data_list$timepoint),
                                                   multiple = TRUE,
@@ -578,24 +651,28 @@ body <- ## Body content
                                                   selected = NULL, 
                                                   width = "200px")),
                                     conditionalPanel(
-                                      condition = "input.groupBy == 'Time point'",
+                                      condition = "input.groupBy == 'Time point' && input.pickVolcanoSpecies == 'mouse'",
                                       pickerInput("global_select_organs","Select organs",
                                                   choices= levels(all_organs_data_list$organ),
                                                   options = list(`actions-box` = TRUE),
                                                   multiple = T,
                                                   width = "200px")),
                                     conditionalPanel(
-                                      condition = "input.groupBy == 'Organ'",
+                                      condition = "input.groupBy == 'Organ' && input.pickVolcanoSpecies == 'mouse'",
                                       pickerInput("global_select_timepoints", "Select timepoints",
                                                   choices = levels(all_organs_data_list$timepoint),
                                                   options = list(`actions-box` = TRUE),
                                                   multiple = TRUE,
                                                   width = "200px")),
+                                    conditionalPanel(
+                                      condition = "input.pickVolcanoSpecies == 'mouse'", 
                                     awesomeRadio("groupBy",
                                                  "Group by:", 
                                                  choices = c("Organ", "Time point"),
                                                  selected = "Time point",
-                                                 inline = FALSE),
+                                                 inline = FALSE)),
+                                    conditionalPanel(
+                                      condition = "input.pickVolcanoSpecies == 'mouse'", 
                                     
                                     prettyCheckbox(inputId = "setScales",
                                                    label = "Fixed scales",
@@ -603,7 +680,7 @@ body <- ## Body content
                                                    shape = "curve",
                                                    animation = "smooth",
                                                    icon = icon("check"),
-                                                   status = "primary")),
+                                                   status = "primary"))),
                              column(width = 4,
                                     awesomeRadio("signif_filter_global",
                                                  "Significance filter", 
@@ -636,7 +713,7 @@ body <- ## Body content
                                                    animation = "smooth",
                                                    icon = icon("check"),
                                                    status = "primary"),
-                                    conditionalPanel(condition = "input.ifAnno == 1", 
+                                    conditionalPanel(condition = "input.ifAnno == 1 && input.pickVolcanoSpecies == 'mouse'", 
                                                      selectizeInput(
                                                        inputId = "GenesToAnno",
                                                        label = div(style = "font-size: 14px", "Select genes to annotate"),
@@ -648,7 +725,20 @@ body <- ## Body content
                                                          placeholder = 'eg. Agap2',
                                                          onInitialize = I('function() { this.setValue("");}')
                                                        )
-                                                     )),
+                                                     )), 
+                                    conditionalPanel(condition = "input.ifAnno == 1 && input.pickVolcanoSpecies == 'human'", 
+                                                     selectizeInput(
+                                                       inputId = "GenesToAnnoHuman",
+                                                       label = div(style = "font-size: 14px", "Select genes to annotate"),
+                                                       multiple = TRUE,
+                                                       size = 20,
+                                                       choices = NULL,
+                                                       width = "200px",
+                                                       options = list(
+                                                         placeholder = 'eg. AGAP2',
+                                                         onInitialize = I('function() { this.setValue("");}')
+                                                       )
+                                                     )), 
                                     
                                     actionBttn("new_plot", "Update plot", icon("redo"), size = "sm", style = "material-flat", block = FALSE, color = "primary" 
                                                # style="color: #fff; background-color: #337ab7; border-color: #2e6da4; display:center-align"
@@ -1245,17 +1335,35 @@ server <- function(input, output, session){
                        selected = character(0),
                        options  = list(placeholder = 'eg. Agap2', onInitialize = I('function() { this.setValue(""); }')))
   
+
+  updateSelectizeInput(session = session, 
+                    inputId = "GenesToAnnoHuman", 
+                    server = TRUE, 
+                    choices = gene_names_vector_Human, 
+                    selected = character(0), 
+                    options = list(placeholder = 'eg. AGAP2', onInitialite = I('function() { this.setValue(""); }')))
+  
   # make a table for volcano plots based on selected FDR and L2FC thresholds
   
   volcano_table <- reactive({
+    
+    if(input$pickVolcanoSpecies == "mouse"){
     all_organs_data_list %>% mutate(gene_type = case_when(log2.Ratio >= input$absLFC_thr_global & get(input$signif_filter_global) <= as.numeric(input$FDR_thr_global) ~ "Upregulated",
                                                           log2.Ratio <= -input$absLFC_thr_global & get(input$signif_filter_global) <= as.numeric(input$FDR_thr_global) ~ "Downregulated",
                                                           TRUE ~ "Nonsignificant")) 
+      
+    }else{
+    CJD_muscle_data %>% mutate(gene_type = case_when(log2.Ratio >= input$absLFC_thr_global & get(input$signif_filter_global) <= as.numeric(input$FDR_thr_global) ~ "Upregulated", 
+                                                     log2.Ratio <= -input$absLFC_thr_global & get(input$signif_filter_global) <= as.numeric(input$FDR_thr_global) ~ "Downregulated", 
+                                                     TRUE ~ "Nonsignificant"))
+    }
   })
   
   # table with all annotated genes:
   
   all_annotated <- reactive({
+    
+    if(input$pickVolcanoSpecies == "mouse"){
     anno_table <- volcano_table() %>%
       dplyr::filter(gene_name %in% input$GenesToAnno) %>% 
       dplyr::select(gene_name, Identifier, biotypes, description, pvalue, FDR, log2.Ratio, organ, timepoint, gene_type) 
@@ -1268,6 +1376,14 @@ server <- function(input, output, session){
         filter(organ %in% input$global_select_organs)
       
     }
+    }else{
+      anno_table <- volcano_table() %>%
+        dplyr::filter(gene_name %in% input$GenesToAnnoHuman) %>%
+        dplyr::select(gene_name, Identifier, biotypes, description, pvalue, FDR, log2.Ratio, gene_type) 
+      
+    }
+    
+    
     anno_table
   })
   
@@ -1309,6 +1425,7 @@ server <- function(input, output, session){
     y_axis_title_global
   })
   
+  
   empty_volcano <- reactive({
     
     
@@ -1331,6 +1448,8 @@ server <- function(input, output, session){
     
     input$new_plot
     isolate({
+      if(input$pickVolcanoSpecies == "mouse"){
+      
       if(input$groupBy == "Time point"){
         if(is.null(input$global_select_one_tp)|is.null(input$global_select_organs)){
           return(1)
@@ -1349,6 +1468,9 @@ server <- function(input, output, session){
           return(n_facets)
         }
       }
+      }else{
+        return(1)
+      }
     })
   })
   
@@ -1357,6 +1479,7 @@ server <- function(input, output, session){
     
     input$new_plot
     isolate({
+      if(input$pickVolcanoSpecies == "mouse"){
       if(input$groupBy == "Time point"){
         return(1)
       }else{
@@ -1366,6 +1489,10 @@ server <- function(input, output, session){
           n_rows <- length(input$global_select_timepoints)/4
           return(ceiling(n_rows))
         }
+      }
+        
+      }else{
+        return(1)
       }
     })
   })
@@ -1387,6 +1514,9 @@ server <- function(input, output, session){
       }else{
         s <- "free"
       }
+      
+      
+      if(input$pickVolcanoSpecies == "mouse"){
       
       if(input$groupBy == "Organ"){
         if(is.null(input$global_select_one_organ)|is.null(input$global_select_timepoints)){
@@ -1510,6 +1640,62 @@ server <- function(input, output, session){
           return(vp)
         }
       }
+        
+      }else{
+        
+        vp <- ggplot(data = volcano_table(), aes(x = log2.Ratio, y = -log10(get(input$signif_filter_global)))) +
+          theme_light() +
+          geom_point(aes(colour = gene_type),
+                     alpha = 0.8,
+                     shape = 16,
+                     size = 1) +
+          geom_hline(yintercept = -log10(as.numeric(input$FDR_thr_global)),
+                     linetype = "dashed") + 
+          geom_vline(xintercept = c(-input$absLFC_thr_global, input$absLFC_thr_global),
+                     linetype = "dashed") +
+          scale_colour_manual(values =  c("Upregulated" = "#ffad73", "Downregulated" = "#26b3ff", "Nonsignificant" = "grey")) + 
+          guides(colour = guide_legend(override.aes = list(size= 4))) +
+          labs(x = expression("Log"[2]*" Fold Change"),
+               y = bquote(-Log[10]*.(volcano_y_title())),
+               colour = NULL, 
+               title = "CJD muscle")+
+          theme(strip.text = element_text(size = 14, colour = "black"),
+                legend.text = element_text(size = 14),
+                axis.title = element_text(size = 16),
+                axis.text = element_text(size = 12),
+                title = element_text(size = 16),
+                
+                legend.position = "bottom",
+                legend.direction = "horizontal")
+        
+        
+        if(input$ifAnno == TRUE & !is.null(input$GenesToAnnoHuman)){
+          vp <- vp +  geom_point(data = downregulated_anno() %>% drop_na(input$signif_filter_global),
+                                 shape = 21,
+                                 size = 2,
+                                 fill = "steelblue",
+                                 colour = "black") +
+            geom_point(data = upregulated_anno() %>% drop_na(input$signif_filter_global),
+                       shape = 21,
+                       size = 2,
+                       fill = "firebrick",
+                       colour = "black") +
+            geom_point(data = nonsignificant_anno() %>% drop_na(input$signif_filter_global),
+                       shape = 21,
+                       size = 2,
+                       fill = "grey34",
+                       colour = "black")+
+            geom_text_repel(data = all_annotated() %>% drop_na(input$signif_filter_global),
+                            aes(label = gene_name, size = 10),
+                            max.overlaps = Inf,
+                            show.legend = FALSE)
+        }
+        
+        
+        vals$vp <- vp
+        return(vp)
+        
+      }
     })   
     
   })
@@ -1528,6 +1714,8 @@ server <- function(input, output, session){
   output$get_the_item <- renderUI({
     input$new_plot
     isolate({
+      
+      if(input$pickVolcanoSpecies == "mouse"){
       if(input$groupBy == "Organ"){
         if(!is.null(input$global_select_one_organ) & !is.null(input$global_select_timepoints)){
           downloadBttn('download_volcano', 'Download plot', style = "material-flat", color = "primary", size = "sm", icon = icon("download"))
@@ -1537,6 +1725,9 @@ server <- function(input, output, session){
           downloadBttn('download_volcano', 'Download plot', style = "material-flat", color = "primary", size = "sm", icon = icon("download"))
         }
       }
+      }else{
+        downloadBttn('download_volcano', 'Download plot', style = "material-flat", color = "primary", size = "sm", icon = icon("download"))
+      }
     })
   })
   
@@ -1544,10 +1735,16 @@ server <- function(input, output, session){
   volcano_plot_name <- reactive({
     input$new_plot
     isolate({
+      
+      if(input$pickVolcanoSpecies == "mouse"){
       if(input$groupBy == "Organ"){
         return(paste(input$global_select_one_organ, gsub(" ", "", paste(input$global_select_timepoints, sep = "", collapse = "_")), sep = "."))
       }else{
         return(paste(input$global_select_one_tp, gsub(" ", "", paste(input$global_select_organs, sep = "", collapse = "_")), sep = "." ))
+      }
+        
+      }else{
+        return("CJD.muscle")
       }
       
     })
@@ -1583,6 +1780,7 @@ server <- function(input, output, session){
   output$get_table_box <- renderUI({
     input$new_plot
     isolate({
+      if(input$pickVolcanoSpecies == "mouse"){
       if(input$groupBy == "Organ"){
         if(!is.null(input$global_select_one_organ)|!is.null(input$global_select_timepoints)){
           if(isTRUE(input$ifAnno)){
@@ -1603,6 +1801,17 @@ server <- function(input, output, session){
                 dataTableOutput("AnnoTable"))
           }
         }
+      }
+        
+      }else{
+        if(isTRUE(input$ifAnno)){
+          box(width = 0,
+              title = "Annotated genes table",
+              solidHeader = TRUE,
+              status = "warning",
+              dataTableOutput("AnnoTable"))
+        }
+        
       }
     })
   })
@@ -2015,21 +2224,52 @@ server <- function(input, output, session){
                        selected = NULL,
                        options  = list(placeholder = 'eg. EMSMUS000...', onInitialize = I('function() { this.setValue(""); }')))
   
+  updateSelectizeInput(session = session, 
+                       inputId = "Entry_gene_expr_down_HUMAN", 
+                       server = TRUE, 
+                       choices = gene_names_vector_Human, 
+                       selected = NULL, 
+                       options = list(placeholder = 'eg. AGAP2', onInitialize = I('function() { this.setValue(""); }')))
+  
+  updateSelectizeInput(session = session, 
+                    inputId = "Entry_ID_expr_down_HUMAN", 
+                    server = TRUE, 
+                    choices = ensembl_ID_vector_Human, 
+                    selected = NULL, 
+                    options = list(placeholder = 'eg. ENSG000...', onInitialize = I('function() { this.setValue(""); }')))
+  
   #when search_gene_down_expr input switches reset inputs for gene filtering
   observeEvent(input$search_gene_expr_down, {
+    
     shinyjs::reset("Entry_gene_expr_down")
     shinyjs::reset("Entry_ID_expr_down")
+    shinyjs::reset("Entry_gene_expr_down_HUMAN")
+    shinyjs::reset("Entry_ID_expr_down_HUMAN")
+    
   })
   
   
   # generate table filtered for everything except gene_name and Identifier
   filtered_gene_down_table <- reactive({
     
+    if(input$pickDownSpecies == "mouse"){
+    
     f <- all_organs_data_list %>% filter(timepoint %in% input$down_expr_time_filter,
                                          organ %in% input$down_exp_organs_filter,
                                          get(input$signif_filter_down_exp) <= as.numeric(input$FDR_thr_down_exp),
                                          abs_l2FC > input$absLFC_thr_down_exp) %>%
       dplyr::select(-abs_l2FC)
+    
+    
+    }else{
+      
+    f <- CJD_muscle_data %>% dplyr::filter(get(input$signif_filter_down_exp_HUMAN) <= as.numeric(input$FDR_thr_down_exp_HUMAN), 
+                                           abs_l2FC > input$absLFC_thr_down_exp_HUMAN) %>%
+      dplyr::select(-abs_l2FC)
+    
+
+    }
+    
     
     f
     
@@ -2040,7 +2280,12 @@ server <- function(input, output, session){
   # table to be displayed if preview data is checked
   
   data_preview <- reactive({
+    
+    
+  if(input$pickDownSpecies == "mouse"){
     if(input$expr_down_opts == "Download entire dataset"){ # if the option to download the entire dataset is selected only preview 20 rows of data 
+      
+    
       
       #first make a table will all data -abs_l2FC and put it into vals; this will be downloaded 
       t <- all_organs_data_list %>% dplyr::select(-abs_l2FC)  
@@ -2060,10 +2305,9 @@ server <- function(input, output, session){
         group_by(organ) %>% 
         top_n(n = 5, wt = abs_l2FC ) %>%  
         dplyr::select(-abs_l2FC)
-      
-      
-      
+    
       return(t2)
+      
     }else if(input$expr_down_opts == "Select filters" & input$search_gene_expr_down == 1){
       if(is.null(input$Entry_gene_expr_down)){
         t <- filtered_gene_down_table()
@@ -2091,6 +2335,43 @@ server <- function(input, output, session){
       
     }
     
+  }else{  # FOR HUMAN
+    
+    if(input$expr_down_opts == "Download entire dataset"){ # if the option to download the entire dataset is selected only preview 20 rows of data 
+      t <- CJD_muscle_data %>% dplyr::select(-abs_l2FC)
+      vals$expr_down_table <- t
+      
+      t2 <- CJD_muscle_data[1:20, ]
+      return(t2)
+      
+    }else if(input$expr_down_opts == "Select filters" & input$search_gene_expr_down_HUMAN == 1){
+      if(is.null(input$Entry_gene_expr_down_HUMAN)){
+        t <- filtered_gene_down_table()
+        vals$expr_down_table <- t #the same table is downloaded and displayed in preview
+        return(t)
+        
+      }else{
+        t <- filtered_gene_down_table() %>% filter(gene_name %in% input$Entry_gene_expr_down_HUMAN)
+        vals$expr_down_table <- t
+        return(t)
+        
+      }
+      
+    }else if(input$expr_down_opts == "Select filters" & input$search_gene_expr_down_HUMAN == 2){
+      if(is.null(input$Entry_ID_expr_down_HUMAN)){
+        t <- filtered_gene_down_table()
+        vals$expr_down_table <- t #the same table is downloaded and displayed in preview
+        return(t)
+      }else{
+        t <- filtered_gene_down_table() %>% filter(Identifier %in% input$Entry_ID_expr_down_HUMAN)
+        vals$expr_down_table <- t
+        return(t)
+    
+    
+      }
+      
+    }
+  }
   })
   
   
@@ -2136,8 +2417,37 @@ server <- function(input, output, session){
     shinyjs::reset("Entry_ID_expr_down")
     shinyjs::reset("FDR_thr_down_exp")
     shinyjs::reset("absLFC_thr_down_exp")
+    shinyjs::reset("search_gene_expr_down_HUMAN")
+    shinyjs::reset("Entry_gene_expr_down_HUMAN")
+    shinyjs::reset("Entry_ID_expr_down_HUMAN")
+    shinyjs::reset("signif_filter_down_exp_HUMAN")
+    shinyjs::reset("FDR_thr_down_exp_HUMAN")
+    shinyjs::reset("absLFC_thr_down_exp_HUMAN")
+    
     
   })
+  
+  
+  observeEvent(input$pickDownSpecies,{
+    shinyjs::reset("see_total_expr")
+    shinyjs::reset("see_filtered_expr")
+    shinyjs::reset("down_exp_organs_filter")
+    shinyjs::reset("down_expr_time_filter")
+    shinyjs::reset("search_gene_expr_down")
+    shinyjs::reset("Entry_gene_expr_down")
+    shinyjs::reset("Entry_ID_expr_down")
+    shinyjs::reset("FDR_thr_down_exp")
+    shinyjs::reset("absLFC_thr_down_exp")
+    shinyjs::reset("search_gene_expr_down_HUMAN")
+    shinyjs::reset("Entry_gene_expr_down_HUMAN")
+    shinyjs::reset("Entry_ID_expr_down_HUMAN")
+    shinyjs::reset("signif_filter_down_exp_HUMAN")
+    shinyjs::reset("FDR_thr_down_exp_HUMAN")
+    shinyjs::reset("absLFC_thr_down_exp_HUMAN")
+    
+    
+  })
+  
   
   output$preview_table <- renderDataTable({
     d <- data_preview()
@@ -2334,6 +2644,9 @@ server <- function(input, output, session){
     shinyjs::reset("variantType_selection")
     
   })
+  
+
+
   
   output$preview_spl_table <- renderDataTable({
     d <- data_preview_spl() 

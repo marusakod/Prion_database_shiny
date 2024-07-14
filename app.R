@@ -9,8 +9,6 @@ library(shinyBS)
 library(ggrepel)
 library(openxlsx)
 library(DT)
-library(SGSeq)
-
 
 source('loadData.R')
 
@@ -21,6 +19,11 @@ source('loadData.R')
 #---- HEADER-----------------------------------------------------------------------------
 
 header <- dashboardHeader(title = "Prion Database",
+                          tags$li(a(href = 'https://doi.org/10.1101/2023.10.31.564879',
+                                    img(src = 'www/extraneural_logo.png',
+                                        title = "Extraneural paper", height = "35px"),
+                                    style = "padding-top:10px; padding-bottom:10px;"),
+                                  class = "dropdown"), 
                           tags$li(a(href = 'https://doi.org/10.1371/journal.ppat.1008653',
                                     img(src = 'www/brain_logo.png',
                                         title = "Brain paper", height = "35px"),
@@ -43,11 +46,9 @@ sidebar <-   dashboardSidebar(
               menuItem("Home", tabName = "description", icon = icon("house")),
               menuItem("Gene search", tabName = "genes", icon = icon("search"),
                        menuSubItem("Global gene expression view", tabName = "multiple_genes"),
-                       menuSubItem("Global splicing view", tabName = "multiple_splices"),
                        menuSubItem("Single gene view", tabName = "one_gene")),
               menuItem("Download", tabName = "download", icon = icon("download"),
-                       menuSubItem("Gene expression data", tabName = "download_expr"),
-                       menuSubItem("Splicing data", tabName = "download_spl"))
+                       menuSubItem("Gene expression data", tabName = "download_expr"))
   )
 )
 
@@ -93,27 +94,7 @@ body <- ## Body content
     
     
     tabItems(
-      # UI for the HOME tab item
-      # tabItem(tabName="welcome",
-      #h2("Welcome to the prion database"),
-      #tags$style(HTML(".small-box {height: 150px}")),
-      # fluidRow(
-      # infoBox("",
-      # a("Learn more", onclick = "openTab('description')", href="#"),
-      #icon=icon("book"),
-      #color = "teal"),
-      #infoBox("",
-      #a("Search for genes", onclick = "openTab('one_gene')", href="#"),
-      #icon=icon("search"),
-      # color = "teal"),
-      # infoBox("",
-      #a("Download data", onclick = "openTab('download_expr')", href="#"),
-      #icon=icon("download"),
-      # color = "teal"),
-      #  )
-      # ),
-      
-      
+  
       tabItem(tabName = "description",
               fluidPage(
                 column(width = 12,
@@ -122,21 +103,21 @@ body <- ## Body content
                        br()),
                 column(width = 6, 
                        br(),
-                       div( img(src='www/experiment.png', height="100%", width="100%"), style="text-align: center;"),
+                       div( img(src='www/experiment_mouse.png', height="100%", width="100%"), style="text-align: center;"),
                        br()),
                 column(width = 6,
-                       p("Prion diseases (PrDs) are fatal neurodegenerative diseases caused by transmissible proteinaceous particles termed prions (PrPSc). Prions primarily consist of the misfolded form of the cellular prion protein (PrPC) incorporated into fibrillary β-sheet-rich structures, which are termed ‘amyloids’. Although prions primarily accumulate in the central nervous system leading to severe pathophysiological brain-related symptoms, they can be taken up by the digestive system, followed by accumulation in lymphoid tissue and neuroinvasion via peripheral nerves. Furthermore, prions can be present in the blood, which represent an efficient route of infection. Here, we present a searchable database of transcriptomic changes in the brain (hippocampus), blood, hindlimb skeletal muscle, and spleen during the entire life span of mice after intracerebral exposure to prions (4, 8, 12, 14, 16, 18 and 20 weeks-post-inoculation and terminal stage).", style="text-align: justify; font-size:18px;"),
+                       p("Prion diseases (PrDs) are fatal neurodegenerative diseases caused by transmissible proteinaceous particles termed prions (PrPSc). Prions primarily consist of the misfolded form of the cellular prion protein (PrPC) incorporated into fibrillary β-sheet-rich structures, which are termed ‘amyloids’. Although prions primarily accumulate in the central nervous system leading to severe pathophysiological brain-related symptoms, they can be taken up by the digestive system, followed by accumulation in lymphoid tissue and neuroinvasion via peripheral nerves. Furthermore, prions can be present in the blood, which represents an efficient route of infection. Here, we present a searchable database of transcriptomic changes in the brain (hippocampus), blood, hindlimb skeletal muscle, and spleen during the entire life span of mice after intracerebral exposure to prions (4, 8, 12, 14, 16, 18 and 20 weeks-post-inoculation and terminal stage).", style="text-align: justify; font-size:18px;"),
                        br(),
                        p("User can navigate to the", span(strong("Gene search")), span("tab and select one of the following sections:"), style="text-align: justify; font-size:18px;"), 
                        tags$div(
                          tags$ul(
                            tags$li(actionLink("link_to_tabitem_multiple_genes", "Global gene expression view"), "tab generates volcano plots with information on differentially expressed across all selected organs and time points.", style="text-align: justify; font-size:18px;"), 
-                           tags$li("In the",actionLink("link_to_tabitem_multiple_splices", "Global splicing view"), "tab, a summary of splice variants in selected organs and time points is shown in a bar chart.", style="text-align: justify; font-size:18px;"),
-                           tags$li(actionLink("link_to_tabitem_one_gene", "Single gene view"), "tab allows the user to select a gene of interest and explore how its expression changes over time in selected organs, identify significantly altered splice variants and generate annotated splice graphs.", style="text-align: justify; font-size:18px;")
+                
+                           tags$li(actionLink("link_to_tabitem_one_gene", "Single gene view"), "tab allows the user to select a gene of interest and explore how its expression changes over time in selected organs.", style="text-align: justify; font-size:18px;")
                          )
                        ), 
                        br(),
-                       p("In the", span(strong("Download tab")), "user can select from", actionLink("link_to_tabitem_expression_data", "Gene expression data"), "and", actionLink("link_to_tabitem_splicing_data", "Splicing data"), "to download either complete or filtered datasets.",  style="text-align: justify; font-size:18px;")
+                       p("In the", span(strong("Download tab")), "user can select", actionLink("link_to_tabitem_expression_data", "Gene expression data"), "to download either complete or filtered datasets.",  style="text-align: justify; font-size:18px;")
                        
                        
                 ),
@@ -152,10 +133,9 @@ body <- ## Body content
                 column(width = 12, 
                        box(width = 0, 
                            fluidPage(column(width= 11, 
-                                            p("In the", strong("'Parameters'"), "section, user can seacrh genes by Ensembl ID or gene Symbol. The expression levels of the selected gene throughout disease progression are displayed in the",
+                                            p("In the", strong("'Parameters'"), "section, user can search genes by Ensembl ID or gene Symbol. The expression levels of the selected gene throughout disease progression are displayed in the",
                                               strong("'Gene expression'"), "section with colors representing different organs. Points which meet the criteria for differential expression specified with", 
-                                              strong("'Significance filter"), "and", strong("'Significance threshold'"), "parameters are marked with a triangle. Splice variants which meet the same criteria are listed in the table within the",
-                                              strong("'Alternative splicing"), "section. By selecting individual rows from that table, user can generate a splice graph with corresponding splice variant colored in red.", 
+                                              strong("'Significance filter"), "and", strong("'Significance threshold'"), "parameters are marked with a triangle", 
                                               style = "text-align: justify; font-size:16px;")), 
                                      column(width = 1, 
                                             div(img(src='www/info.png', height="60%", width="60%"), style="text-align: center;"))))), 
@@ -252,13 +232,13 @@ body <- ## Body content
                                         color = "primary",
                                         size = "sm",
                                         icon = icon("download")))),
-                column(width = 12, 
-                       box(width = 0,
-                           title = "Alternative splicing",
-                           solidHeader = TRUE,
-                           status = "warning",
-                           uiOutput("get_splicing_out"))),
-                column(width = 12, uiOutput("get_splice_graph"))
+                # column(width = 12, 
+                #        box(width = 0,
+                #            title = "Alternative splicing",
+                #            solidHeader = TRUE,
+                #            status = "warning",
+                #            uiOutput("get_splicing_out"))),
+                # column(width = 12, uiOutput("get_splice_graph"))
                 
               )),
       
@@ -390,165 +370,12 @@ body <- ## Body content
                                                            icon = icon("download"))),
                                             bsPopover("see_total_expr", title="Entire dataset preview", placement="bottom", options = list(container = "body"),
                                                       content="The entire dataset contains 1357312 rows. Only 20 rows will be displayed in preview."))
-                           
-                           
-                           # this has to somehow appear only when user selects xlsx as filetype 
-                           #bsPopover("label_down_total_expr",
-                           #title="Entire dataset download",
-                           #placement="bottom",
-                           #options = list(container = "body"),
-                           #content=".xlsx file with a separate sheet for each organ will be downloaded"))
-                           
-                           
-                           
-                           
+ 
                        )),
                 
                 column(width = 9, uiOutput("get_box_for_preview")))),
       
-      # SPLICING DATA DOWNLOAD TAB
-      
-      tabItem(tabName = "download_spl",
-              fluidRow(
-                column(width = 3,
-                       box(width = 0,
-                           awesomeRadio(inputId = "spl_down_opts",
-                                        label = "Download options",
-                                        choices = c("Download entire dataset", "Select filters"),
-                                        selected = "Download entire dataset"), 
-                           
-                           conditionalPanel("input.spl_down_opts == 'Select filters'",
-                                            
-                                            pickerInput("down_spl_organs_filter","Select organs",
-                                                        choices= levels(all_organs_data_list$organ),
-                                                        options = list(`actions-box` = TRUE),
-                                                        multiple = T,
-                                                        width = "200px"),
-                                            
-                                            pickerInput("down_spl_time_filter", "Select timepoints",
-                                                        choices = levels(all_organs_data_list$timepoint),
-                                                        options = list(`actions-box` = TRUE),
-                                                        multiple = TRUE,
-                                                        width = "200px"),
-                                            awesomeRadio(
-                                              inputId = "search_gene_spl_down",
-                                              label = div(style = "font-size: 14px", "Filter genes by:"),
-                                              choices = c("Gene Symbol" = 1, "Ensembl ID" = 2),
-                                              selected =  1,
-                                              inline = FALSE
-                                            ),
-                                            conditionalPanel(
-                                              "input.search_gene_spl_down == 1",
-                                              selectizeInput(
-                                                inputId = "Entry_gene_spl_down",
-                                                label = div(style = "font-size: 14px", " Select Gene Symbol"),
-                                                multiple = TRUE,
-                                                size = 20,
-                                                choices = NULL,
-                                                width = "200px",
-                                                options = list(
-                                                  placeholder = 'eg. Agap2',
-                                                  onInitialize = I('function() { this.setValue("");}')
-                                                )
-                                              )
-                                            ),
-                                            conditionalPanel(
-                                              "input.search_gene_spl_down == 2",
-                                              selectizeInput(
-                                                inputId = "Entry_ID_spl_down",
-                                                label = div(style = "font-size: 14px","Select Ensembl gene ID"),
-                                                multiple = TRUE,
-                                                size = 20,
-                                                choices = NULL,
-                                                width = "200px",
-                                                options = list(
-                                                  placeholder = 'eg. ENSMUS...',
-                                                  onInitialize = I('function() { this.setValue(""); }')
-                                                )
-                                              )
-                                            )),
-                           
-                           conditionalPanel("input.spl_down_opts == 'Select filters'",
-                                            
-                                            pickerInput("variantType_selection",
-                                                        "Splice Variant Type",
-                                                        choices = unique(all_SGDEX_results_merged$variantTypeFullName_merged),
-                                                        options = list(`actions-box` = TRUE),
-                                                        multiple = TRUE,
-                                                        width = "200px"),
-                                            
-                                            awesomeRadio(inputId = "signif_thr_type_down_spl",
-                                                         label = "Significance filter",
-                                                         choices = c("FDR" = "FDR" , "p-value (unadjusted)" = "pvalue"),
-                                                         selected = "FDR",
-                                                         inline = FALSE),
-                                            
-                                            awesomeRadio(inputId = "signif_thr_down_spl",
-                                                         label = div(style = "font-size: 14px", "Significance threshold"),
-                                                         choices = c("no filter" = 2, 
-                                                                     "0.1" = 0.1,
-                                                                     "0.05" = 0.05,
-                                                                     "0.01" =  0.01,
-                                                                     "0.001" = 0.001,
-                                                                     "10-4" = 0.0001,
-                                                                     "10-5" = 0.00001),
-                                                         selected = 0.05),
-                                            sliderInput(inputId = "absLFC_thr_down_spl",
-                                                        label = div(style = "font-size: 14px", "Absolute Fold Change Threshold"),
-                                                        value = 0,
-                                                        min = 0,
-                                                        max = 5,
-                                                        step = 0.5,
-                                                        ticks = TRUE,
-                                                        width = "200px")),
-                           pickerInput(inputId = "spl_down_filetype",
-                                       label = "Select file type",
-                                       choices = c("csv", "xlsx", "tsv", "rds"),
-                                       selected = "csv",
-                                       multiple = FALSE),
-                           conditionalPanel("input.spl_down_opts == 'Select filters'",
-                                            splitLayout(
-                                              prettyCheckbox(inputId = "see_filtered_spl",
-                                                             label = "PREVIEW DATA",
-                                                             value = FALSE,
-                                                             status = "warning",
-                                                             icon = icon("eye"), 
-                                                             plain = TRUE,
-                                                             bigger = TRUE,
-                                                             shape = "curve",
-                                                             animation = "smooth",
-                                                             outline = TRUE),
-                                              downloadBttn(outputId = "down_filtered_spl",
-                                                           label = "Download",
-                                                           style = "material-flat",
-                                                           color = "primary",
-                                                           size = "sm",
-                                                           icon = icon("download")))),
-                           conditionalPanel(condition = "input.spl_down_opts == 'Download entire dataset'",
-                                            splitLayout(
-                                              prettyCheckbox(inputId = "see_total_spl",
-                                                             label = "PREVIEW DATA",
-                                                             value = FALSE,
-                                                             status = "warning",
-                                                             icon = icon("eye"), 
-                                                             plain = TRUE,
-                                                             bigger = TRUE, 
-                                                             shape = "curve",
-                                                             animation = "smooth",
-                                                             outline = TRUE),
-                                              
-                                              
-                                              downloadBttn(outputId = "down_total_spl",
-                                                           label = tags$span(id = "label_down_total_spl", "Download"),
-                                                           style = "material-flat",
-                                                           color = "primary",
-                                                           size = "sm",
-                                                           icon = icon("download"))),
-                                            bsPopover("see_total_spl", title="Entire dataset preview", placement="bottom", options = list(container = "body"),
-                                                      content="The entire dataset contains 492840 rows. Only 20 rows will be displayed in preview."))
-                           
-                       )),
-                column(width = 9, uiOutput("get_box_for_spl_preview")))), 
+    
       # GLOBAL GENE VIEW TAB------------------------------------------------------------------------------------------------
       
       tabItem(tabName = "multiple_genes",
@@ -693,114 +520,8 @@ body <- ## Body content
               
               
               
-      ),
+      )))
       
-      # GLOBAL SPLICING VIEW TAB
-      
-      tabItem(tabName = "multiple_splices",
-              fluidRow(
-                column(width = 7,
-                       box(width = 0,
-                           title = "Plot Parameters",
-                           solidHeader = TRUE,
-                           status = "warning",
-                           fluidPage(
-                             column( width= 4, 
-                                     awesomeRadio("SgroupBy",
-                                                  "Group by:", 
-                                                  choices = c("Organ" = "organ", "Time point" = "timepoint"),
-                                                  selected = "organ",
-                                                  inline = FALSE),
-                                     pickerInput("S_Organ_pick",
-                                                 "Select Organs",
-                                                 choices = levels(all_organs_data_list$organ),
-                                                 options = list(`actions-box` = TRUE),
-                                                 multiple = TRUE,
-                                                 width = "200px"),
-                                     pickerInput("S_Time_pick",
-                                                 "Select timepoints",
-                                                 choices = levels(all_organs_data_list$timepoint),
-                                                 options =  list(`actions-box` = TRUE),
-                                                 multiple = TRUE,
-                                                 width = "200px")
-                             ),
-                             column(width = 4,
-                                    awesomeRadio("signif_filter",
-                                                 "Significance filter", 
-                                                 choices = c("FDR" = "FDR", "p-value (unadjusted)" = "pvalue"),
-                                                 selected = "FDR",
-                                                 inline = FALSE),
-                                    awesomeRadio(inputId = "signif_thr",
-                                                 label = div(style = "font-size: 14px", "Significance threshold"),
-                                                 choices = c("0.1" = 0.1,
-                                                             "0.05" = 0.05,
-                                                             "0.01" = 0.01,
-                                                             "0.001" = 0.001,
-                                                             "10-4" = 0.0001,
-                                                             "10-5" = 0.00001),
-                                                 selected = 0.05)
-                                    
-                                    
-                             ),
-                             column(width = 4, 
-                                    sliderInput(inputId = "absLFC_thr_splicing",
-                                                label = div(style = "font-size: 14px", "Absolute Fold Change Threshold"),
-                                                value = 0,
-                                                min = 0,
-                                                max = 5,
-                                                step = 0.5,
-                                                ticks = TRUE,
-                                                width = "200px"),
-                                    prettyCheckbox(inputId = "setScales_S",
-                                                   label = "Fixed scales",
-                                                   value = FALSE,
-                                                   shape = "curve",
-                                                   animation = "smooth",
-                                                   icon = icon("check"),
-                                                   status = "primary"),
-                                    actionBttn("new_spl_plot", "Update plot", icon("redo"), size = "sm", style = "material-flat", block = FALSE, color = "primary"),
-                                    
-                                    bsPopover("new_spl_plot", title="Update splice variant count plot", placement="bottom", options = list(container = "body"),
-                                              content="This will generate a new plot with speficied parameters")) 
-                             
-                             
-                           )
-                       )
-                       
-                ),
-                column(width = 5, 
-                       box(width = 0, 
-                           fluidPage(
-                             column(width = 9, 
-                                    p("In the", strong("'Plot parameters'"), "section, user can select", strong("'Group by: Organ'"), "to generate a bar plot with time points on the x-axis and selected organs as facets. With", 
-                                      strong("'Group by: Time point'"), "time points are displayed as facets. User can select different thresholds for identifying splice variants with differential usage by adjusting the", 
-                                      strong("'Significance filter'") ,",", strong("'Significance threshold'"), "and", strong("'Absolute Fold Change Threshold'"), "parameters. Checking the box",
-                                      strong("'Fixed scales'"), "will generate a faceted bar chart with a shared y-axis. When individual bars in the plot are clicked a table with additional information is displayed underneath.", 
-                                      style = "text-align: justify; font-size:16px;")),
-                             column(width = 3, 
-                                    div(img(src='www/info.png', height="80%", width="80%"), style="text-align: center;")))
-                       )),
-                column(width = 12, align = "center", uiOutput("get_splicingPlot_box")),
-                column(width = 12, uiOutput("get_spl_table_box"))
-                
-                
-                
-              )
-              
-              
-      )
-      
-    )
-    
-    
-    
-  )
-
-
-
-
-
-
 
 # combine UI elements
 ui <- function(){
@@ -1040,202 +761,7 @@ server <- function(input, output, session){
     }
   )
   
-  # GENERATE A TABLE WITH SPLICING RESULTS
-  
-  
-  # display a table when no gene is selected and when filtered dataset contains rows. Display text otherwise
-  spl_table_filtered <- reactive({
-    o <- organ_vec()
-    s <- input$one_gene_signif_filter
-    
-    if(input$search_gene == 1) {
-      
-      a <- all_SGDEX_results_merged %>% dplyr::filter(geneSymbol == Entry_variable()) %>%
-        filter(organ %in% o[which(o != "")]) %>%
-        filter(get(s) <= as.numeric(input$FDR_thr))
-      
-    }else{
-      
-      a <- all_SGDEX_results_merged %>% dplyr::filter(EnsemblID == Entry_variable()) %>% 
-        filter(organ %in% o[which(o != "")]) %>% 
-        filter(get(s) <= as.numeric(input$FDR_thr))
-      
-    }
-    
-    a
-    
-  })
-  
-  # if no gene is selected or filtered table has rows render a datatable, otherwise render text
-  
-  output$get_splicing_out <- renderUI({
-    a <- spl_table_filtered()
-    if(input$Entry_gene == "" & input$Entry_ID == ""){
-      dataTableOutput("single_gene_table_splicing")
-    }else if(nrow(a) == 0){
-      textOutput("no_spl_text")
-    }else{
-      dataTableOutput("single_gene_table_splicing")
-    }
-  })
-  
-  output$no_spl_text <- renderText({
-    "No significant splice variants detected"
-  })
-  
-  output$single_gene_table_splicing <- renderDataTable({
-    
-    org <- organ_vec()
-    a <- spl_table_filtered()
-    
-    if(input$Entry_gene == "" & input$Entry_ID == ""){
-      DT::datatable(a, options = list(pageLength = 25, scrollX = TRUE), selection = "none")
-      
-    }else{
-      if(nrow(a) == 0){
-        DT::datatable(a, options = list(scrollX = TRUE, language = list(zeroRecords = "No significant splice variants detected")))
-        
-      }else{
-        col <- color_vec()
-        # which are the unique organs that remain in a after filtering
-        spl_org <- unique(a$organ)
-        #subset_org 
-        orgs <- org[org %in% spl_org]
-        #subset_colors
-        cols <- col[names(col) %in% spl_org]
-        DT::datatable(a, options = list(pageLength = 25, scrollX = TRUE), selection = "single") %>%
-          formatStyle(columns = "organ",
-                      backgroundColor = styleEqual(orgs, cols)) %>%
-          formatRound(columns = c('exonBaseMean',
-                                  'dispersion',
-                                  'stat',
-                                  'pvalue',
-                                  'log2.Ratio',
-                                  'FDR',
-                                  'NBH',
-                                  'RML6'), digits = 3) 
-        
-      }
-    }
-  })
-  
-  selected_row_data  <- reactive({
-    
-    selected_row_index <- input$single_gene_table_splicing_rows_selected 
-    # extract selected row from filtered splicing table and print the eventID, variantID, entrezID, organ, timepoint
-    spl_table_filtered()[selected_row_index, c("eventID", "variantID", "EntrezID", "organ", "timepoint")]
-    
-  })
-  
-  output$get_splice_graph <- renderUI({
-    if(nrow(selected_row_data()) != 0){
-      box(width = 0,
-          height = 500,
-          solidHeader = TRUE, 
-          title = "Splice graph", 
-          status = "warning", 
-          fluidPage(
-            column(width = 1,
-                   prettyCheckbox(inputId = "draw_to_scale",
-                                  label = "Scaled",
-                                  value = FALSE,
-                                  shape = "curve",
-                                  animation = "smooth",
-                                  icon = icon("check"),
-                                  status = "primary")),
-            column(width = 1,
-                   prettyCheckbox(inputId = "annotateSgraph",
-                                  label = "Annotate",
-                                  value = FALSE,
-                                  shape = "curve",
-                                  animation = "smooth",
-                                  icon = icon("check"),
-                                  status = "primary")),
-            column(width = 1,
-                   prettyCheckbox(inputId = "outlineExons",
-                                  label = "Exon borders",
-                                  value = FALSE,
-                                  shape = "curve",
-                                  animation = "smooth",
-                                  icon = icon("check"),
-                                  status = "primary"))),
-          
-          plotOutput("splice_graph")
-      )
-      
-      
-    }
-  })
-  
-  # render a plot with colored selected splice variant-------------------------------------
-  
-  output$splice_graph <- renderPlot({
-    if(nrow(selected_row_data()) != 0){
-      variant_row <- selected_row_data()
-      
-      #selected timepoint and organ
-      to <- paste(as.character(variant_row$organ), "_", gsub(" wpi", "_", variant_row$timepoint), sep = "")
-      
-      # find correct sg feature counts and sg variant counts
-      nfc <- names(all_sg_feature_counts)
-      nvc <- names(all_sg_variant_counts)
-      
-      sgfc_pred <- all_sg_feature_counts[[nfc[grepl(to, nfc)]]]
-      sgvc_pred <- all_sg_variant_counts[[nvc[grepl(to, nvc)]]]
-      
-      # which feature IDs constitute a specific variant
-      x <- rowRanges(sgfc_pred)
-      y <- as.data.frame(x)
-      
-      s <- as.data.frame(mcols(sgvc_pred))
-      k <- s[which(s$variantID == as.integer(selected_row_data()$variantID)), ]$featureID
-      k <- as.integer(str_split(k, ",")[[1]])
-      
-      c <- which(y$featureID %in% k)
-      
-      color_vec <- rep("grey", nrow(y))
-      color_vec[c] <- "red"
-      
-      
-      mcols(sgfc_pred)= cbind(mcols(sgfc_pred),
-                              DataFrame(color = color_vec))
-      
-      if(input$draw_to_scale == 1){
-        scale <- "gene"
-      }else{
-        scale <- "none"
-      }
-      
-      if(input$annotateSgraph == 1){
-        annos <- "id"
-      }else{
-        annos <- "none"
-      }
-      
-      if(input$outlineExons == 1){
-        outline <- "black"
-      }else{
-        outline <- "fill"
-      }
-      
-      
-      
-      plotSpliceGraph(rowRanges(sgfc_pred),
-                      geneName = as.integer(selected_row_data()$EntrezID),
-                      toscale = scale,
-                      border = outline,
-                      short_output = FALSE,
-                      label = annos)
-      
-    }else{ # create some plot when no rows from the splicing table are selected so there is no error
-      
-      ggplot(all_SGDEX_results_merged, aes(x = FDR, y = pvalue)) + geom_blank()
-      
-    }
-    
-  })
-  
-  # GLOBAL GENE EXPRESSION VIEW TAB ------------------------------------------------------------------
+
   
   # update selectize input which allows user to select genes to annotate
   updateSelectizeInput(session  = session,
